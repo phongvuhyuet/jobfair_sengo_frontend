@@ -5,7 +5,7 @@
 /** Generate by swagger-axios-codegen */
 /* eslint-disable */
 // @ts-nocheck
-import axiosStatic, { AxiosInstance, AxiosRequestConfig } from "axios";
+import axiosStatic, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 export interface IRequestOptions extends AxiosRequestConfig {}
 
@@ -26,40 +26,31 @@ export interface ServiceOptions {
 export const serviceOptions: ServiceOptions = {};
 
 // Instance selector
-export function axios(
-  configs: IRequestConfig,
-  resolve: (p: any) => void,
-  reject: (p: any) => void
-): Promise<any> {
+export function axios(configs: IRequestConfig, resolve: (p: any) => void, reject: (p: any) => void): Promise<any> {
   if (serviceOptions.axios) {
     return serviceOptions.axios
       .request(configs)
-      .then((res) => {
+      .then(res => {
         resolve(res.data);
       })
-      .catch((err) => {
+      .catch(err => {
         reject(err);
       });
   } else {
-    throw new Error("please inject yourself instance like axios  ");
+    throw new Error('please inject yourself instance like axios  ');
   }
 }
 
-export function getConfigs(
-  method: string,
-  contentType: string,
-  url: string,
-  options: any
-): IRequestConfig {
+export function getConfigs(method: string, contentType: string, url: string, options: any): IRequestConfig {
   const configs: IRequestConfig = { ...options, method, url };
   configs.headers = {
     ...options.headers,
-    "Content-Type": contentType,
+    'Content-Type': contentType
   };
   return configs;
 }
 
-export const basePath = "/api/v1";
+export const basePath = '/api/v1';
 
 export interface IList<T> extends Array<T> {}
 export interface List<T> extends Array<T> {}
@@ -95,14 +86,9 @@ export class HealthzService {
    */
   static healthz(options: IRequestOptions = {}): Promise<healthz_resp> {
     return new Promise((resolve, reject) => {
-      let url = basePath + "/healthz";
+      let url = basePath + '/healthz';
 
-      const configs: IRequestConfig = getConfigs(
-        "get",
-        "application/json",
-        url,
-        options
-      );
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
 
       /** 适配ios13，get请求不允许带body */
 
