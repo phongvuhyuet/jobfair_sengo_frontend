@@ -6,7 +6,7 @@ import Router from "next/router";
 import NProgress from "nprogress";
 import { ReactElement, ReactNode, useEffect } from "react";
 import { NextPage } from "next";
-
+import { injectInstance } from "src/common/axios";
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
@@ -16,6 +16,7 @@ type AppPropsWithLayout = AppProps & {
 
 function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   // nprogress
+  injectInstance()
   NProgress.configure({ showSpinner: false });
   useEffect(() => {
     const handleRouteStart = () => NProgress.start();
