@@ -1,11 +1,12 @@
-import 'styles/globals.css'
 import 'nprogress/nprogress.css'
+import 'styles/globals.css'
 
+import { createTheme, ThemeProvider } from '@mui/material'
+import { NextPage } from 'next'
 import { AppProps } from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
 import { ReactElement, ReactNode, useEffect } from 'react'
-import { NextPage } from 'next'
 import { injectInstance } from 'src/common/axios'
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode
@@ -13,6 +14,12 @@ export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout
 }
+
+const theme = createTheme({
+  palette: {
+    primary: { main: '#FF8E3C' },
+  },
+})
 
 function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   // nprogress
@@ -36,7 +43,11 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   const getLayout = Component.getLayout ?? (page => page)
 
-  return getLayout(<Component {...pageProps} />)
+  return getLayout(
+    <ThemeProvider theme={theme}>
+      <Component {...pageProps} />
+    </ThemeProvider>
+  )
 }
 
 export default MyApp
