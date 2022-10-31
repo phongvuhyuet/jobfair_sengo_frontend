@@ -80,13 +80,104 @@ export class PagedResultDto<T = any> implements IPagedResult<T> {
 // customer definition
 // empty
 
-export class HealthzService {
+export class PostsService {
   /**
-   * test Health server
+   * create post
    */
-  static healthz(options: IRequestOptions = {}): Promise<healthz_resp> {
+  static posts(
+    params: {
+      /** requestBody */
+      body?: CreatePostDto;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<StatusResponseDto> {
     return new Promise((resolve, reject) => {
-      let url = basePath + '/healthz';
+      let url = basePath + '/posts';
+
+      const configs: IRequestConfig = getConfigs('post', 'application/json', url, options);
+
+      let data = params.body;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * get list posts
+   */
+  static posts1(options: IRequestOptions = {}): Promise<PostResponseDto[]> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/posts';
+
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+
+      /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * update post
+   */
+  static posts2(
+    params: {
+      /**  */
+      id: string;
+      /** requestBody */
+      body?: UpdatePostDto;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<StatusResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/posts/{id}';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('put', 'application/json', url, options);
+
+      let data = params.body;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * delete post
+   */
+  static posts3(
+    params: {
+      /**  */
+      id: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<StatusResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/posts/{id}';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('delete', 'application/json', url, options);
+
+      let data = null;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * get post
+   */
+  static posts4(
+    params: {
+      /**  */
+      id: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<PostResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/posts/{id}';
+      url = url.replace('{id}', params['id'] + '');
 
       const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
 
@@ -97,7 +188,87 @@ export class HealthzService {
   }
 }
 
-export interface healthz_resp {
+export interface StatusResponseDto {
   /**  */
-  status?: string;
+  message?: string;
+}
+
+export interface CreatePostDto {
+  /**  */
+  title?: string;
+
+  /**  */
+  content?: string;
+}
+
+export interface UpdatePostDto {
+  /**  */
+  title?: string;
+
+  /**  */
+  content?: string;
+
+  /**  */
+  topic_id?: string;
+
+  /**  */
+  user_id?: string;
+
+  /**  */
+  upvote_count?: number;
+
+  /**  */
+  downvote_count?: number;
+
+  /**  */
+  status?: EnumUpdatePostDtoStatus;
+
+  /**  */
+  publishedAt?: string;
+
+  /**  */
+  reject_reason?: string;
+}
+
+export interface PostResponseDto {
+  /**  */
+  _id?: string;
+
+  /**  */
+  title?: string;
+
+  /**  */
+  content?: string;
+
+  /**  */
+  topic_id?: string;
+
+  /**  */
+  user_id?: string;
+
+  /**  */
+  upvote_count?: number;
+
+  /**  */
+  downvote_count?: number;
+
+  /**  */
+  reject_reason?: string;
+
+  /**  */
+  publishedAt?: Date;
+
+  /**  */
+  status?: number;
+
+  /**  */
+  createdAt?: Date;
+
+  /**  */
+  updatedAt?: Date;
+}
+export enum EnumUpdatePostDtoStatus {
+  'active' = 'active',
+  'pending' = 'pending',
+  'reject' = 'reject'
 }
