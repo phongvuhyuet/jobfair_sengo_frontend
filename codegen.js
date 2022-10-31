@@ -17,7 +17,7 @@ const genAxios = async () => {
   try {
     if (process.env.API_REMOTE) {
       await new Downloader({
-        url: 'https://jobfair-sengo-backend.vercel.app/swagger/swagger.json',
+        url: 'https://jobfair-senkou-backend-phongvuhyuet.vercel.app/api-json',
         directory: `./src/common/open-api/`,
         fileName: 'swagger.json',
         cloneFiles: false,
