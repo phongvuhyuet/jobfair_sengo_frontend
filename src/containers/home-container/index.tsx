@@ -2,16 +2,20 @@ import styles from './Home.module.css'
 import Slider from '@mui/material/Slider'
 import useBearStore from './store'
 import { useEffect } from 'react'
-// import { HealthzService } from '../../common/open-api/swagger.gen'
+import { PostsService } from '../../common/open-api/swagger.gen'
 
 const HomeContainer = (): JSX.Element => {
   const bears = useBearStore(state => state.bears)
   const increase = useBearStore(state => state.increase)
-  // useEffect(() => {
-  //   HealthzService.healthz().then(resp => {
-  //     console.log(resp)
-  //   })
-  // }, [])
+  useEffect(() => {
+    try {
+      PostsService.posts1().then(resp => {
+        console.log(resp)
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
   return (
     <div className={styles.container}>
       <h1 className="text-3xl font-bold underline">{bears}</h1>

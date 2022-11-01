@@ -15,6 +15,7 @@
     "@emotion/styled": "^11.10.4",
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.10",
+    "@tinymce/tinymce-react": "^4.2.0",
     "cookie": "^0.5.0",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.6",
@@ -27,6 +28,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.38.0",
     "swagger-axios-codegen": "^0.13.3",
+    "tinymce": "^6.2.0",
     "zustand": "^4.1.2"
   },
   "devDependencies": {
