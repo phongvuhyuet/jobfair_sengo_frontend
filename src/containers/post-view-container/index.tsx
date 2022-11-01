@@ -4,6 +4,7 @@ import { PostResponseDto, PostsService } from 'src/common/open-api'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import Sms from '@mui/icons-material/Sms';
+import { Formatter } from 'src/common/helpers'
 
 export interface IProps {
   id?: string
@@ -11,7 +12,7 @@ export interface IProps {
 
 const PostContainer = ({ id }: IProps): JSX.Element => {
   const [ postData, setPostData ] = useState({} as PostResponseDto)
-  const [ errorData, setError ] = useState({ occurred: false, reason: "" })
+  const [ error, setError ] = useState(null)
   
   useEffect(() => {
     getPostData();
@@ -21,24 +22,21 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
     if (!id) return
     PostsService.posts4({ id: id })
       .then(
-        data => {
-          setPostData(data)
-          console.log(data)
-        },
+        setPostData,
         (error) => {
           const message = error.response.data.message;
-          setError({ occurred: true, reason: message });
+          setError(message);
         })
   }
 
-  //Todo: refactor to helper class
-  const formatDate = (date: Date | undefined): string => {
-    if (!date) return "";
-    return new Intl.DateTimeFormat("vi-VN", {
-      dateStyle: "short",
-      timeStyle: "short",
-      hour12: true,
-    }).format(new Date(date))
+  if (error) {
+    //Todo: use theme color instead
+    return (
+      <Card className="p-3 px-10 pb-7 text-center">
+        <p className="text-red-400">Đã xảy ra lỗi khi hiển thị bài đăng!</p>
+        { error }
+      </Card>
+    )
   }
 
   return (
@@ -52,7 +50,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           <p className="font-semibold text-2xl my-3">{postData.title ?? ""}</p>
         </div>
         <div className="col-span-1">
-          <p className="italic font-light text-xs">{formatDate(postData.createdAt)}</p>
+          <p className="italic font-light text-xs">{Formatter.dateTime(postData.createdAt)}</p>
         </div>
 
         {/* Row: author, vote, comment */}
@@ -60,15 +58,15 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         <div className="flex-row col-span-5 gap-[10px]">
           <div className="inline pr-1">
             <IconButton sx={{color: "primary.light"}}><KeyboardArrowUp/></IconButton>
-            <span className="font-semibold">{postData.upvote_count ?? 0}</span>
+            <span className="font-semibold">{postData.upvote_count ?? "-"}</span>
           </div>
           <div className="inline pr-1">
             <IconButton ><KeyboardArrowDown/></IconButton>
-            <span className="font-semibold">{postData.downvote_count ?? 0}</span>
+            <span className="font-semibold">{postData.downvote_count ?? "-"}</span>
           </div>
           <div className="inline pr-1">
             <IconButton sx={{color: "primary.light"}}><Sms/></IconButton>
-            <span className="font-semibold">100</span>
+            <span className="font-semibold">-</span>
           </div>
         </div>
       </div>
