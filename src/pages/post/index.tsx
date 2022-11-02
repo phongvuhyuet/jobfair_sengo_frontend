@@ -21,8 +21,8 @@ const PostList: NextPageWithLayout = () => {
       <h1>Danh sách bài viết</h1>
       <ul className="list-none">
         {listPosts.map(post => (
-          <div className="cursor-pointer hover:text-cyan-500 hover:bg-slate-200 p-2">
-            <Link key={post._id} href={'/post/view/' + post._id}>
+          <div key={post._id} className="cursor-pointer hover:text-cyan-500 hover:bg-slate-200 p-2">
+            <Link href={'/post/view/' + post._id}>
               <li>{post.title}</li>
             </Link>
           </div>
