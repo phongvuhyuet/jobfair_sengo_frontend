@@ -63,6 +63,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         body: body,
       }).then(resp => {
         setMessage(prev => ({ ...prev, open: true, type: 'success', content: 'Cập nhật post thành công' }))
+        router.push('/post/view/' + id)
       })
     } catch (error) {
       setMessage(prev => ({ ...prev, open: true, type: 'error', content: 'Đã có lỗi xảy ra' }))
@@ -78,7 +79,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         body: body,
       }).then(resp => {
         setMessage(prev => ({ ...prev, open: true, type: 'success', content: 'Tạo post thành công' }))
-        resetForm()
+        router.push('/post/')
       })
     } catch (error) {
       setMessage(prev => ({ ...prev, open: true, type: 'error', content: 'Đã có lỗi xảy ra' }))
