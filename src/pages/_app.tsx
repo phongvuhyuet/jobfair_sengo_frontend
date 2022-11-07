@@ -17,23 +17,20 @@ type AppPropsWithLayout = AppProps & {
 
 const theme = createTheme({
   typography: {
-    fontFamily: [
-      "Be Vietnam",
-      "Roboto"
-    ].join(","),
+    fontFamily: ['Be Vietnam', 'Roboto'].join(','),
     body1: {
       fontSize: 16,
-      fontWeight: 400
+      fontWeight: 400,
     },
     subtitle1: {
       fontSize: 12,
       fontWeight: 200,
-      fontStyle: 'italic'
-    }
+      fontStyle: 'italic',
+    },
   },
   palette: {
     primary: { main: '#FF8E3C' },
-    
+    secondary: { main: '#6C757D' },
   },
 })
 
