@@ -22,10 +22,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
     if (!id) return
     PostsService.posts4({ id: id })
       .then(
-        (data) => {
-          setPostData(data)
-          console.log(data)
-        },
+        setPostData,
         (error) => {
           const message = error.response.data.message;
           setError(message);
