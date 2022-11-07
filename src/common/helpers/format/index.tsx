@@ -2,10 +2,10 @@ import dayjs, { Dayjs } from 'dayjs'
 
 export const Format = {
   date: 'YYYY-MM-DD',
-  dateTime: 'YYYY-MM-DD HH:MM:SS',
+  dateTime: 'YYYY-MM-DD hh:mm:ss A',
   dateJp: 'YYYY/MM/DD',
   month: 'YYYY-MM',
-  dateTimeJp: 'YYYY/MM/DD HH:MM:SS',
+  dateTimeJp: 'YYYY/MM/DD HH:mm:ss',
   monthJp: 'YYYY/MM',
 }
 

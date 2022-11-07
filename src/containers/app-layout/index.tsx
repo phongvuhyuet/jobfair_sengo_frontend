@@ -1,9 +1,10 @@
+import Navbar from "./navbar"
+
 export default function Layout({ children }: { children: JSX.Element }) {
   return (
     <>
       <div>
-        <h1>Senkou</h1>
-        <hr />
+        <Navbar></Navbar>
         <main>{children}</main>
       </div>
     </>
