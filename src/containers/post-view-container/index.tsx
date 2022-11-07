@@ -47,9 +47,11 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
       <div className="grid grid-cols-6 gap-4 p-3">
 
         {/* Row: avatar, tag, title, date */}
-        <Avatar sx={{width: 80, height: 80}} className="col-span-1 self-center justify-self-center">Q</Avatar>
+        <Avatar sx={{width: 80, height: 80}} className="col-span-1 self-center justify-self-center">
+          {postData.user?.name?.toLocaleUpperCase()[0] ?? "-"}
+        </Avatar>
         <div className="col-span-4">
-          <Button variant="outlined" type="submit" className="normal-case p-1 py-0">Tag</Button>
+          <Button variant="outlined" type="submit" className="normal-case p-1 py-0">{postData.topic?.name ?? "-"}</Button>
           <p className="font-semibold text-2xl my-3">{postData.title ?? ""}</p>
         </div>
         <div className="col-span-1">
@@ -57,7 +59,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         </div>
 
         {/* Row: author, vote, comment */}
-        <p className="my-2 text-center text-xs">Nguyen Van Quynh</p>
+        <p className="my-2 text-center text-xs">{postData.user?.name ?? "-"}</p>
         <div className="flex-row col-span-5 gap-[10px]">
           <div className="inline pr-1">
             <IconButton sx={{color: "primary.light"}}><KeyboardArrowUp/></IconButton>

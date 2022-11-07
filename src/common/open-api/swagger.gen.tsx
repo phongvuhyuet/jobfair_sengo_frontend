@@ -188,6 +188,114 @@ export class PostsService {
   }
 }
 
+export class TopicsService {
+  /**
+   * create topic
+   */
+  static topics(
+    params: {
+      /** requestBody */
+      body?: CreateTopicDto;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<StatusResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/topics';
+
+      const configs: IRequestConfig = getConfigs('post', 'application/json', url, options);
+
+      let data = params.body;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * get list topics
+   */
+  static topics1(options: IRequestOptions = {}): Promise<TopicRespDto[]> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/topics';
+
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+
+      /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * update topic
+   */
+  static topics2(
+    params: {
+      /**  */
+      id: string;
+      /** requestBody */
+      body?: UpdateTopicDto;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<StatusResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/topics/{id}';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('put', 'application/json', url, options);
+
+      let data = params.body;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * delete topic
+   */
+  static topics3(
+    params: {
+      /**  */
+      id: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<StatusResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/topics/{id}';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('delete', 'application/json', url, options);
+
+      let data = null;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * get topic
+   */
+  static topics4(
+    params: {
+      /**  */
+      id: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<TopicRespDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/topics/{id}';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+
+      /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
+}
+
 export interface StatusResponseDto {
   /**  */
   message?: string;
@@ -199,6 +307,9 @@ export interface CreatePostDto {
 
   /**  */
   content?: string;
+
+  /**  */
+  topic_id?: string;
 }
 
 export interface UpdatePostDto {
@@ -230,6 +341,22 @@ export interface UpdatePostDto {
   reject_reason?: string;
 }
 
+export interface TopicInfo {
+  /**  */
+  name?: string;
+
+  /**  */
+  _id?: string;
+}
+
+export interface UserInfo {
+  /**  */
+  name?: string;
+
+  /**  */
+  _id?: string;
+}
+
 export interface PostResponseDto {
   /**  */
   _id?: string;
@@ -241,10 +368,10 @@ export interface PostResponseDto {
   content?: string;
 
   /**  */
-  topic_id?: string;
+  topic?: TopicInfo;
 
   /**  */
-  user_id?: string;
+  user?: UserInfo;
 
   /**  */
   upvote_count?: number;
@@ -260,6 +387,30 @@ export interface PostResponseDto {
 
   /**  */
   status?: number;
+
+  /**  */
+  createdAt?: Date;
+
+  /**  */
+  updatedAt?: Date;
+}
+
+export interface CreateTopicDto {
+  /**  */
+  name?: string;
+}
+
+export interface UpdateTopicDto {
+  /**  */
+  name?: string;
+}
+
+export interface TopicRespDto {
+  /**  */
+  _id?: string;
+
+  /**  */
+  name?: string;
 
   /**  */
   createdAt?: Date;
