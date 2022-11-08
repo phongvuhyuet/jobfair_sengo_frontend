@@ -11,9 +11,10 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { CreatePostDto, PostsService, UpdatePostDto } from 'src/common/open-api'
+import { CreatePostDto, TopicRespDto, PostsService, TopicsService, UpdatePostDto } from 'src/common/open-api'
 import Markdown from 'src/components/markdown'
 import { useRouter } from 'next/router'
+import { appLibrary } from 'src/common/utils/loading'
 
 export interface IProps {
   id?: string
@@ -28,17 +29,32 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   })
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [listTopics, setListTopics] = useState<TopicRespDto[]>([])
+  const [topic, setTopic] = useState('')
+  const getListTopics = async () => {
+    try {
+      await TopicsService.topics1().then(resp => {
+        setListTopics(resp)
+      })
+    } catch (error) {
+      setMessage(prev => ({ ...prev, open: true, type: 'error', content: 'Đã có lỗi xảy ra' }))
+    }
+  }
+  const getPostData = async id => {
+    try {
+      await PostsService.posts4({ id: id }).then(resp => {
+        setTitle(resp.title || '')
+        setContent(resp.content || '')
+        setTopic(resp.topic?._id || '')
+      })
+    } catch (error) {
+      setMessage(prev => ({ ...prev, open: true, type: 'error', content: 'Đã có lỗi xảy ra' }))
+    }
+  }
   useEffect(() => {
+    getListTopics()
     if (id) {
-      try {
-        PostsService.posts4({ id: id }).then(resp => {
-          console.log(resp)
-          setTitle(resp.title || '')
-          setContent(resp.content || '')
-        })
-      } catch (error) {
-        setMessage(prev => ({ ...prev, open: true, type: 'error', content: 'Đã có lỗi xảy ra' }))
-      }
+      getPostData(id)
     }
   }, [id])
 
@@ -62,6 +78,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         id: id,
         body: body,
       }).then(resp => {
+        appLibrary.hideloading()
         setMessage(prev => ({ ...prev, open: true, type: 'success', content: 'Cập nhật post thành công' }))
         router.push('/post/view/' + id)
       })
@@ -78,6 +95,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
       PostsService.posts({
         body: body,
       }).then(resp => {
+        appLibrary.hideloading()
         setMessage(prev => ({ ...prev, open: true, type: 'success', content: 'Tạo post thành công' }))
         router.push('/post/')
       })
@@ -85,17 +103,21 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
       setMessage(prev => ({ ...prev, open: true, type: 'error', content: 'Đã có lỗi xảy ra' }))
     }
   }
+
   const onSubmit = data => {
-    if (content && title && data.topic) {
+    if (content && title && topic) {
+      appLibrary.showloading()
       if (id) {
         handleUpdatePost(id, {
           title: title,
           content: content,
+          topic_id: topic,
         })
       } else {
         handleCreatePost({
           title: title,
           content: content,
+          topic_id: topic,
         })
       }
     } else {
@@ -109,14 +131,14 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           <div className="flex flex-row items-center gap-[50px] flex-wrap">
             <div className="flex flex-row items-center justify-between gap-10">
               <FormControl>
-                <Typography variant="body2">Tiêu đề</Typography>
+                <Typography variant="body2">
+                  Tiêu đề <span className="text-red-600 text-sm">*</span>
+                </Typography>
               </FormControl>
-              <FormControl>
+              <FormControl sx={{ width: 300 }}>
                 <TextField
                   required
                   variant="outlined"
-                  fullWidth
-                  focused
                   size="small"
                   {...register('title')}
                   value={title}
@@ -128,13 +150,26 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
             </div>
             <div className="flex flex-row items-center gap-10">
               <FormControl>
-                <Typography variant="body2">Chủ đề</Typography>
+                <Typography variant="body2">
+                  Chủ đề <span className="text-red-600 text-sm">*</span>
+                </Typography>
               </FormControl>
-              <FormControl size="small" focused required>
-                <Select required defaultValue={1} color="primary" variant="outlined" {...register('topic')}>
-                  <MenuItem value={1}>Ten</MenuItem>
-                  <MenuItem value={2}>Twenty</MenuItem>
-                  <MenuItem value={3}>Thirty</MenuItem>
+              <FormControl size="small" sx={{ width: 300 }}>
+                <Select
+                  required
+                  value={topic}
+                  color="primary"
+                  variant="outlined"
+                  {...register('topic')}
+                  onChange={e => {
+                    setTopic(e.target.value)
+                  }}
+                >
+                  {listTopics.map(topic => (
+                    <MenuItem key={topic._id} value={topic._id}>
+                      {topic.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </div>
@@ -142,7 +177,9 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
 
           <div className="grid grid-cols-1 gap-[10px]">
             <FormControl>
-              <Typography variant="body2">Nội dung</Typography>
+              <Typography variant="body2">
+                Nội dung <span className="text-red-600 text-sm">*</span>
+              </Typography>
             </FormControl>
             <div>
               <Markdown type="post" content={content} setContent={setContent}></Markdown>
@@ -154,10 +191,21 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
               </FormControl>
             </div>
           </div>
-
-          <Button variant="contained" type="submit" className="w-1/5 text-white self-center">
-            {id ? 'Cập nhật' : 'Tạo'}
-          </Button>
+          <div className="flex flex-row flex-end justify-end">
+            <Button
+              variant="outlined"
+              type="button"
+              className="w-[110px] xl:w-[130px] mr-2 text-[#6c757d] border-[#6c757d] self-center"
+              onClick={() => {
+                router.push('/post')
+              }}
+            >
+              Hủy
+            </Button>
+            <Button variant="contained" type="submit" className="w-[110px] xl:w-[130px] ml-2 text-white self-center">
+              {id ? 'Cập nhật' : 'Tạo'}
+            </Button>
+          </div>
         </div>
       </form>
       <Snackbar
