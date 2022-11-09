@@ -90,7 +90,7 @@ export class PostsService {
       body?: CreatePostDto;
     } = {} as any,
     options: IRequestOptions = {}
-  ): Promise<StatusResponseDto> {
+  ): Promise<PostResponseDto> {
     return new Promise((resolve, reject) => {
       let url = basePath + '/posts';
 
@@ -296,51 +296,6 @@ export class TopicsService {
   }
 }
 
-export interface StatusResponseDto {
-  /**  */
-  message?: string;
-}
-
-export interface CreatePostDto {
-  /**  */
-  title?: string;
-
-  /**  */
-  content?: string;
-
-  /**  */
-  topic_id?: string;
-}
-
-export interface UpdatePostDto {
-  /**  */
-  title?: string;
-
-  /**  */
-  content?: string;
-
-  /**  */
-  topic_id?: string;
-
-  /**  */
-  user_id?: string;
-
-  /**  */
-  upvote_count?: number;
-
-  /**  */
-  downvote_count?: number;
-
-  /**  */
-  status?: EnumUpdatePostDtoStatus;
-
-  /**  */
-  publishedAt?: string;
-
-  /**  */
-  reject_reason?: string;
-}
-
 export interface TopicInfo {
   /**  */
   name?: string;
@@ -393,6 +348,51 @@ export interface PostResponseDto {
 
   /**  */
   updatedAt?: Date;
+}
+
+export interface CreatePostDto {
+  /**  */
+  title?: string;
+
+  /**  */
+  content?: string;
+
+  /**  */
+  topic_id?: string;
+}
+
+export interface UpdatePostDto {
+  /**  */
+  title?: string;
+
+  /**  */
+  content?: string;
+
+  /**  */
+  topic_id?: string;
+
+  /**  */
+  user_id?: string;
+
+  /**  */
+  upvote_count?: number;
+
+  /**  */
+  downvote_count?: number;
+
+  /**  */
+  status?: EnumUpdatePostDtoStatus;
+
+  /**  */
+  publishedAt?: string;
+
+  /**  */
+  reject_reason?: string;
+}
+
+export interface StatusResponseDto {
+  /**  */
+  message?: string;
 }
 
 export interface CreateTopicDto {

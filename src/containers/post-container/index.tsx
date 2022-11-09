@@ -97,7 +97,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
       }).then(resp => {
         appLibrary.hideloading()
         setMessage(prev => ({ ...prev, open: true, type: 'success', content: 'Tạo post thành công' }))
-        router.push('/post/')
+        router.push('/post/view/' + resp._id)
       })
     } catch (error) {
       setMessage(prev => ({ ...prev, open: true, type: 'error', content: 'Đã có lỗi xảy ra' }))
