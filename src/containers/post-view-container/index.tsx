@@ -22,7 +22,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   const getPostData = () => {
     if (!id) return
     appLibrary.showloading()
-    PostsService.posts4({ id: id }).then(
+    PostsService.posts3({ id: id }).then(
       data => {
         setPostData(data)
         console.log(data)

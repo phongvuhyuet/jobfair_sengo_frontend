@@ -104,23 +104,9 @@ export class PostsService {
     });
   }
   /**
-   * get list posts
-   */
-  static posts1(options: IRequestOptions = {}): Promise<PostResponseDto[]> {
-    return new Promise((resolve, reject) => {
-      let url = basePath + '/posts';
-
-      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
-
-      /** 适配ios13，get请求不允许带body */
-
-      axios(configs, resolve, reject);
-    });
-  }
-  /**
    * update post
    */
-  static posts2(
+  static posts1(
     params: {
       /**  */
       id: string;
@@ -145,7 +131,7 @@ export class PostsService {
   /**
    * delete post
    */
-  static posts3(
+  static posts2(
     params: {
       /**  */
       id: string;
@@ -168,7 +154,7 @@ export class PostsService {
   /**
    * get post
    */
-  static posts4(
+  static posts3(
     params: {
       /**  */
       id: string;
@@ -178,6 +164,41 @@ export class PostsService {
     return new Promise((resolve, reject) => {
       let url = basePath + '/posts/{id}';
       url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+
+      /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * filter list post by topic posts
+   */
+  static byTopic(
+    params: {
+      /**  */
+      topicId: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<PostResponseDto[]> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/posts/by-topic';
+
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+      configs.params = { topic_id: params['topicId'] };
+
+      /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * newest 5 post
+   */
+  static newest(options: IRequestOptions = {}): Promise<PostResponseDto[]> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/posts/newest';
 
       const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
 
@@ -288,6 +309,27 @@ export class TopicsService {
       url = url.replace('{id}', params['id'] + '');
 
       const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+
+      /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * get topic with post count
+   */
+  static withPostCount(
+    params: {
+      /**  */
+      topicCount?: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<TopicWithPostCountDto[]> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/topics/all/with-post-count';
+
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+      configs.params = { topic_count: params['topicCount'] };
 
       /** 适配ios13，get请求不允许带body */
 
@@ -417,6 +459,23 @@ export interface TopicRespDto {
 
   /**  */
   updatedAt?: Date;
+}
+
+export interface TopicWithPostCountDto {
+  /**  */
+  _id?: string;
+
+  /**  */
+  name?: string;
+
+  /**  */
+  createdAt?: Date;
+
+  /**  */
+  updatedAt?: Date;
+
+  /**  */
+  countPost?: number;
 }
 export enum EnumUpdatePostDtoStatus {
   'active' = 'active',
