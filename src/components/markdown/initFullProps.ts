@@ -31,18 +31,26 @@ const editProps = {
     'wordcount',
     'export',
     'pageembed',
+    'uploadcare',
   ],
   toolbar:
     'undo redo | fontsize fontfamily ' +
     'bold italic underline subscript superscript | backcolor forecolor | alignleft aligncenter ' +
     'alignright alignjustify | bullist numlist outdent indent | ' +
-    'removeformat | anchor image media link | help',
+    'removeformat | uploadcare media link | help |',
   toolbar_groups: {
     home: {
       icon: 'home',
       tooltip: 'Home',
       items: 'h1 h2 h3 h4 h5 h6',
     },
+  },
+  external_plugins: {
+    uploadcare: 'https://uploadcare.github.io/uploadcare-tinymce/dist/uploadcare.tinymce@6.x/plugin.js',
+  },
+  uploadcare: {
+    publicKey: process.env.NEXT_PUBLIC_API_UPLOADCARE_KEY,
+    imageShrink: '500x375',
   },
   images_upload_url: 'postAcceptor.php',
   automatic_uploads: false,
