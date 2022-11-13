@@ -15,6 +15,7 @@ import { CreatePostDto, TopicRespDto, PostsService, TopicsService, UpdatePostDto
 import Markdown from 'src/components/markdown'
 import { useRouter } from 'next/router'
 import { appLibrary } from 'src/common/utils/loading'
+import { Box } from '@mui/system'
 
 export interface IProps {
   id?: string
@@ -42,7 +43,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   }
   const getPostData = async id => {
     try {
-      await PostsService.posts4({ id: id }).then(resp => {
+      await PostsService.posts3({ id: id }).then(resp => {
         setTitle(resp.title || '')
         setContent(resp.content || '')
         setTopic(resp.topic?._id || '')
@@ -74,7 +75,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   }
   const handleUpdatePost = (id, body: UpdatePostDto) => {
     try {
-      PostsService.posts2({
+      PostsService.posts1({
         id: id,
         body: body,
       }).then(resp => {
@@ -145,6 +146,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
                   onChange={event => {
                     setTitle(event.target.value)
                   }}
+                  sx={{ backgroundColor: 'white' }}
                 />
               </FormControl>
             </div>
@@ -164,6 +166,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
                   onChange={e => {
                     setTopic(e.target.value)
                   }}
+                  sx={{ backgroundColor: 'white' }}
                 >
                   {listTopics.map(topic => (
                     <MenuItem key={topic._id} value={topic._id}>
@@ -183,27 +186,21 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
             </FormControl>
             <div>
               <Markdown type="post" content={content} setContent={setContent}></Markdown>
-              <FormControl>
-                <Button variant="outlined" component="label" size="small">
-                  Đính kèm tệp
-                  <input hidden accept="image/*" type="file" />
-                </Button>
-              </FormControl>
             </div>
           </div>
           <div className="flex flex-row flex-end justify-end">
+            <Button variant="contained" type="submit" className="w-[110px] xl:w-[130px] mr-2 text-white self-center">
+              {id ? 'Cập nhật' : 'Tạo'}
+            </Button>
             <Button
-              variant="outlined"
+              variant="contained"
               type="button"
-              className="w-[110px] xl:w-[130px] mr-2 text-[#6c757d] border-[#6c757d] self-center"
+              className="w-[110px] xl:w-[130px] ml-2 text-white bg-[#6c757d] self-center"
               onClick={() => {
                 router.push('/post')
               }}
             >
               Hủy
-            </Button>
-            <Button variant="contained" type="submit" className="w-[110px] xl:w-[130px] ml-2 text-white self-center">
-              {id ? 'Cập nhật' : 'Tạo'}
             </Button>
           </div>
         </div>

@@ -1,34 +1,50 @@
-import styles from './Home.module.css'
-import Slider from '@mui/material/Slider'
-import useBearStore from './store'
-import { useEffect } from 'react'
-import { PostsService } from '../../common/open-api/swagger.gen'
+import { useEffect, useState } from 'react'
+import { PostResponseDto, PostsService } from '../../common/open-api/swagger.gen'
+import { Card } from '@mui/material'
+import { appLibrary } from 'src/common/utils/loading'
+import PostItem from 'src/components/post-item'
+import Complementary from 'src/components/complementary'
 
 const HomeContainer = (): JSX.Element => {
-  const bears = useBearStore(state => state.bears)
-  const increase = useBearStore(state => state.increase)
+  const [listPostsNewest, setListPostsNewest] = useState([] as PostResponseDto[])
+
   useEffect(() => {
+    appLibrary.showloading()
     try {
-      PostsService.posts1().then(resp => {
-        console.log(resp)
+      PostsService.newest().then(resp => {
+        setListPostsNewest(resp)
+        appLibrary.hideloading()
       })
     } catch (error) {
       console.log(error)
     }
   }, [])
   return (
-    <div className={styles.container}>
-      <h1 className="text-3xl font-bold underline">{bears}</h1>
-      <Slider defaultValue={30} />
-      <Slider defaultValue={30} className="text-teal-600" />
-      <button
-        onClick={() => {
-          increase(3)
-        }}
-      >
-        add bears
-      </button>
-    </div>
+    <>
+      {listPostsNewest.length > 0 ? (
+        <div className="flex">
+          <div className="w-3/4 max-xl:w-full">
+            <ul className="list-none">
+              <h2 className="mt-0">Bài viết mới nhất</h2>
+              {listPostsNewest.map(post => (
+                <PostItem key={post._id} post={post} />
+              ))}
+            </ul>
+            <ul className="list-none">
+              <h2 className="mt-0">Bài viết nổi bật</h2>
+              {listPostsNewest.map(post => (
+                <PostItem key={post._id} post={post} />
+              ))}
+            </ul>
+          </div>
+          <div className="w-1/5 max-xl:hidden fixed right-[24px] mt-[53px]">
+            <Complementary />
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   )
 }
 
