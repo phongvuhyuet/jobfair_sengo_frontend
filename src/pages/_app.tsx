@@ -8,6 +8,7 @@ import Router from 'next/router'
 import NProgress from 'nprogress'
 import { ReactElement, ReactNode, useEffect } from 'react'
 import { injectInstance } from 'src/common/axios'
+import { ToastContainer } from 'react-toastify'
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode
 }
@@ -58,6 +59,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   return getLayout(
     <ThemeProvider theme={theme}>
+      <ToastContainer />
       <Component {...pageProps} />
     </ThemeProvider>
   )

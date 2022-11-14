@@ -1,9 +1,31 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Stack, TextField } from '@mui/material'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Pagination,
+  Stack,
+  TextField,
+} from '@mui/material'
+import {
+  DataGrid,
+  GridColDef,
+  gridPageCountSelector,
+  gridPageSelector,
+  useGridApiContext,
+  useGridSelector,
+} from '@mui/x-data-grid'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import { CreateTopicDto, TopicRespDto, TopicsService } from 'src/common/open-api'
 import { appLibrary } from 'src/common/utils/loading'
+type FormInputs = {
+  name: string
+}
 
 export interface IProps {
   id?: string
@@ -13,22 +35,24 @@ interface IEdit {
   open: boolean
   item: any
   onChange(open: boolean): void
-  setLoad(load: boolean): void
+  updateUi(id: string, topics: string): void
 }
 interface IDelete {
   open: boolean
   id: string
   onChange(open: boolean): void
-  setLoad(load: boolean): void
+  updateUI(topicId: string): void
 }
 
-const TopicEdit = ({ open, item, onChange, setLoad }: IEdit) => {
+const TopicEdit = ({ open, item, onChange, updateUi }: IEdit) => {
   const {
     register,
     handleSubmit,
     reset,
+    setError,
+    setValue,
     formState: { errors },
-  } = useForm()
+  } = useForm<FormInputs>({ criteriaMode: 'all' })
 
   useEffect(() => {
     reset()
@@ -37,28 +61,40 @@ const TopicEdit = ({ open, item, onChange, setLoad }: IEdit) => {
   const handleEdit = async (name: string) => {
     onChange(false)
     appLibrary.showloading()
-    setLoad(true)
     try {
-      const res = await TopicsService.topics2({ id: item.id, body: { name: name } })
-      console.log(res)
+      const { message } = await TopicsService.topics2({ id: item.id, body: { name: name } })
+      console.log(message)
+      if (message === 'Update Success') {
+        toast.success('Cập nhật chủ đề thành công')
+        updateUi(item.id, name)
+      } else {
+        toast.error('Cập nhật chủ đề thất bại')
+      }
       reset()
-      setLoad(false)
       appLibrary.hideloading()
     } catch (error) {
       console.log(error)
-      setLoad(false)
+      toast.error('Cập nhật chủ đề thất bại')
       appLibrary.hideloading()
     }
   }
 
+  useEffect(() => {
+    setError('name', {
+      types: {
+        pattern: 'Tên chủ đề cần 6-60 ký tự, bao gồm ký tự chữ và không chứa ký tự đặc biệt',
+      },
+    })
+  }, [setValue])
+
   const onEdit = data => {
-    console.log(data)
     const { name } = data
     handleEdit(name)
   }
 
   return (
     <Dialog
+      fullWidth
       onClose={() => {
         onChange(false)
       }}
@@ -67,16 +103,23 @@ const TopicEdit = ({ open, item, onChange, setLoad }: IEdit) => {
       <DialogTitle>Chỉnh sửa</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit(onEdit)}>
-          <FormControl>
+          <FormControl fullWidth>
             <TextField
               margin="dense"
               required
               variant="outlined"
               fullWidth
-              focused
               size="small"
               defaultValue={item.name}
-              {...register('name')}
+              error={errors.name ? true : false}
+              helperText={
+                errors.name ? 'Tên chủ đề cần 6-60 ký tự, bao gồm ký tự chữ và không chứa ký tự đặc biệt' : null
+              }
+              {...register('name', {
+                pattern: /(?=.*[a-zA-Z])(?=^(?:(?![`*!@#$%^&*()_\-=+><,.?/\\|\[\]~:;'"]).)*$).{6,60}/,
+                maxLength: 60,
+                minLength: 6,
+              })}
             />
           </FormControl>
           <DialogActions>
@@ -100,19 +143,30 @@ const TopicEdit = ({ open, item, onChange, setLoad }: IEdit) => {
   )
 }
 
-const DeleteConfirm = ({ open, id, onChange, setLoad }: IDelete) => {
+const DeleteConfirm = ({ open, id, onChange, updateUI }: IDelete) => {
   const handleDeleteTopic = async (deleteId: string) => {
     onChange(false)
     appLibrary.showloading()
-    setLoad(true)
     try {
-      const res = await TopicsService.topics3({ id: deleteId })
-      console.log(res)
-      setLoad(false)
+      const { message } = await TopicsService.topics3({ id: deleteId })
+      console.log(message)
+      if (message === 'Delete Success') {
+        toast.success('Xóa chủ đề thành công')
+        appLibrary.hideloading()
+        updateUI(deleteId)
+        return
+      }
+      if (message === 'contained post') {
+        toast.error('Chủ đề này đã có bài viết, không thể xóa')
+        appLibrary.hideloading()
+        return
+      }
+      toast.error('Xóa chủ đề thất bại')
       appLibrary.hideloading()
     } catch (error) {
       console.log(error)
-      setLoad(false)
+      toast.error('Xóa chủ đề thất bại')
+
       appLibrary.hideloading()
     }
   }
@@ -153,7 +207,6 @@ const DeleteConfirm = ({ open, id, onChange, setLoad }: IDelete) => {
 
 const TopicContainer = (): JSX.Element => {
   const [topics, setTopics] = useState<TopicRespDto[]>([])
-  const [loadingOver, setLoadingOver] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
   const [openDelete, setOpenDelete] = useState(false)
   const [editItem, setEditItem] = useState({})
@@ -162,19 +215,51 @@ const TopicContainer = (): JSX.Element => {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
-  } = useForm()
+  } = useForm<FormInputs>({ criteriaMode: 'all' })
+
+  const updateTopics = (id: string, name: string) => {
+    var newArray = [...topics]
+
+    topics.map(item => {
+      if (item._id === id) {
+        item.name = name
+      }
+    })
+
+    setTopics(newArray)
+  }
+
+  const deleteTopics = (id: string) => {
+    console.log(topics)
+    setTopics(prev => prev.filter(item => item._id != id))
+  }
+
+  function CustomPagination() {
+    const apiRef = useGridApiContext()
+    const page = useGridSelector(apiRef, gridPageSelector)
+    const pageCount = useGridSelector(apiRef, gridPageCountSelector)
+
+    return (
+      <Pagination
+        color="primary"
+        count={pageCount}
+        page={page + 1}
+        onChange={(event, value) => apiRef.current.setPage(value - 1)}
+      />
+    )
+  }
 
   const getTopicsData = async () => {
     appLibrary.showloading()
     try {
-      const res = await TopicsService.topics1()
+      var res = await TopicsService.topics1()
       if (!res) return
       res.map(item => {
         item['id'] = item['_id']
-        delete item['_id']
       })
-      setTopics(res)
+      setTopics(res.reverse())
       appLibrary.hideloading()
     } catch (error) {
       console.log(error)
@@ -184,25 +269,47 @@ const TopicContainer = (): JSX.Element => {
 
   useEffect(() => {
     getTopicsData()
-  }, [loadingOver])
+  }, [])
 
   const handleCreateTopic = async (name: CreateTopicDto) => {
-    setLoadingOver(true)
+    let newTopic: TopicRespDto = {
+      _id: Date.now().toLocaleString(),
+      createdAt: new Date('11/11/2022'),
+      updatedAt: new Date('11/11/2022'),
+      name: name.name,
+    }
+    console.log(newTopic)
+    var newArray = [...topics]
+
+    appLibrary.showloading()
     try {
-      const { message } = await TopicsService.topics({ body: name })
-      if (message === 'Create success') {
-        console.log('Tao thanh cong')
-        setLoadingOver(false)
+      const data = await TopicsService.topics({ body: name })
+      console.log(data)
+      if (data) {
+        const temp: TopicRespDto = data
+        newArray.unshift(temp)
+        newArray[0]['id'] = newArray[0]['_id']
+        toast.success('Tạo chủ đề thành công')
+        setTopics(newArray)
+        appLibrary.hideloading()
         return
       }
-      console.log('Tao that bai')
+      toast.error('Tạo chủ đề thất bại')
+      appLibrary.hideloading()
     } catch (error) {
       console.log(error)
-      setLoadingOver(false)
+      toast.error('Tạo chủ đề thất bại')
+      appLibrary.hideloading()
     }
   }
 
-  const onSubmit = data => {
+  const onSubmit = (data: FormInputs) => {
+    setError('name', {
+      types: {
+        pattern: 'Tên chủ đề cần 6-60 ký tự, bao gồm ký tự chữ và không chứa ký tự đặc biệt',
+      },
+    })
+    console.log(data)
     const { name } = data
     reset()
     handleCreateTopic({ name: name })
@@ -254,9 +361,7 @@ const TopicContainer = (): JSX.Element => {
         onChange={value => {
           setOpenEdit(value)
         }}
-        setLoad={value => {
-          setLoadingOver(value)
-        }}
+        updateUi={updateTopics}
       />
       <DeleteConfirm
         open={openDelete}
@@ -264,23 +369,36 @@ const TopicContainer = (): JSX.Element => {
           setOpenDelete(value)
         }}
         id={deleteItem ? deleteItem : ''}
-        setLoad={value => {
-          setLoadingOver(value)
-        }}
+        updateUI={deleteTopics}
       />
       <div className="flex flex-col justify-center items-center">
         <h1>Tạo chủ đề mới</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-row gap-10">
+          <div className="flex flex-row gap-10 justify-start">
             <div className="flex flex-row items-center justify-between gap-10">
               <FormControl sx={{ width: 300 }}>
-                <TextField required variant="outlined" fullWidth size="small" {...register('name')} />
+                <TextField
+                  required
+                  variant="outlined"
+                  fullWidth
+                  error={errors.name ? true : false}
+                  helperText={
+                    errors.name ? 'Tên chủ đề cần 6-60 ký tự, bao gồm ký tự chữ và không chứa ký tự đặc biệt' : null
+                  }
+                  size="small"
+                  {...register('name', {
+                    pattern: /(?=.*[a-zA-Z])(?=^(?:(?![`*!@#$%^&*()_\-=+><,.?/\\|\[\]~:;'"]).)*$).{6,60}/,
+                    maxLength: 60,
+                    minLength: 6,
+                  })}
+                />
               </FormControl>
             </div>
-
-            <Button variant="contained" type="submit" className="w-1/3 !text-white self-center">
-              Tạo
-            </Button>
+            <FormControl>
+              <Button variant="contained" type="submit" className="w-1/3 !text-white self-center">
+                Tạo
+              </Button>
+            </FormControl>
           </div>
         </form>
         <div className="h-[500px] w-[90%] m-10">
@@ -290,6 +408,9 @@ const TopicContainer = (): JSX.Element => {
             rows={topics ? topics : []}
             pageSize={7}
             rowsPerPageOptions={[5]}
+            components={{
+              Pagination: CustomPagination,
+            }}
           />
         </div>
       </div>

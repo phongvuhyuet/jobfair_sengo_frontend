@@ -219,7 +219,7 @@ export class TopicsService {
       body?: CreateTopicDto;
     } = {} as any,
     options: IRequestOptions = {}
-  ): Promise<StatusResponseDto> {
+  ): Promise<TopicRespDto> {
     return new Promise((resolve, reject) => {
       let url = basePath + '/topics';
 
@@ -432,21 +432,6 @@ export interface UpdatePostDto {
   reject_reason?: string;
 }
 
-export interface StatusResponseDto {
-  /**  */
-  message?: string;
-}
-
-export interface CreateTopicDto {
-  /**  */
-  name?: string;
-}
-
-export interface UpdateTopicDto {
-  /**  */
-  name?: string;
-}
-
 export interface TopicRespDto {
   /**  */
   _id?: string;
@@ -459,6 +444,16 @@ export interface TopicRespDto {
 
   /**  */
   updatedAt?: Date;
+}
+
+export interface CreateTopicDto {
+  /**  */
+  name?: string;
+}
+
+export interface UpdateTopicDto {
+  /**  */
+  name?: string;
 }
 
 export interface TopicWithPostCountDto {
