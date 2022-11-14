@@ -6,6 +6,7 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import Sms from '@mui/icons-material/Sms'
 import { Formatter } from 'src/common/helpers'
 import { appLibrary } from 'src/common/utils/loading'
+import TagItem from 'src/components/tag'
 
 export interface IProps {
   id?: string
@@ -54,9 +55,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           {postData.user?.name?.toLocaleUpperCase()[0] ?? '-'}
         </Avatar>
         <div className="col-span-4">
-          <Button variant="outlined" type="submit" className="normal-case p-1 py-0">
-            {postData.topic?.name ?? '-'}
-          </Button>
+          {postData.topic && <TagItem topic={postData.topic}></TagItem>}
           <p className="font-semibold text-2xl my-3">{postData.title ?? ''}</p>
         </div>
         <div className="col-span-1">
