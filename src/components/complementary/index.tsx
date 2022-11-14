@@ -17,13 +17,13 @@ export default function Complementary() {
   }, [])
   return (
     <Box sx={{ boxShadow: 3 }}>
-      <Card className="h-[820px] overflow-scroll">
+      <Card className="h-[750px] overflow-scroll">
         <div className="max-h-[250px] flex flex-col items-center mb-[20px]">
           <h3>Chủ đề </h3>
           <div className="w-full flex flex-col px-2 px-[30px]">
             <ul className="list-none">
               {listTopic.map(topic => (
-                <Link key={topic._id} href={'/post/topic/' + topic._id}>
+                <Link key={topic._id} href={'/topic/' + topic._id}>
                   <li className="w-full p-[10px] hover:bg-slate-300 hover:cursor-pointer">{topic.name}</li>
                 </Link>
               ))}

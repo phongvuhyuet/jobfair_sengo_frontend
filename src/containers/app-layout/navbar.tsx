@@ -86,7 +86,9 @@ const Navbar = (): JSX.Element => {
       <AppBar position="static" sx={{ backgroundColor: 'white' }}>
         <StyledToolbar>
           {/* Logo */}
-          <Image src="/logo.png" width={121} height={51} className="pl-10" />
+          <Link href="/">
+            <a><Image src="/logo.png" width={121} height={51} className="pl-10" /></a>
+          </Link>
           <Box sx={{ flexGrow: 1 }} />
           {/* Search bar */}
           <Search>
@@ -104,17 +106,17 @@ const Navbar = (): JSX.Element => {
           <NavLink href="/post/new">Tạo bài viết</NavLink>
 
           <Box sx={{ flexGrow: 1 }} />
-          <IconButton size="large">
+          <IconButton size="large" className="pb-0">
             {/* <Badge badgeContent={4} color="error"> */}
             <MailIcon />
             {/* </Badge> */}
           </IconButton>
-          <IconButton size="large">
+          <IconButton size="large" className="pb-0">
             {/* <Badge badgeContent={17} color="error"> */}
             <NotificationsIcon />
             {/* </Badge> */}
           </IconButton>
-          <IconButton size="large">
+          <IconButton size="large" className="pb-0">
             <Avatar sx={{ width: 24, height: 24 }} className="col-span-1 self-center justify-self-center text-xs">
               Q
             </Avatar>

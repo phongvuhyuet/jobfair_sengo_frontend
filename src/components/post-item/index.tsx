@@ -4,6 +4,7 @@ import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined'
 import Link from 'next/link'
 import { Formatter } from 'src/common/helpers'
 import { Box } from '@mui/system'
+import TagItem from '../tag'
 
 export default function PostItem({ post }) {
   return (
@@ -18,11 +19,7 @@ export default function PostItem({ post }) {
           </div>
           <div className="col-start-3 col-end-11 flex flex-col justify-between">
             <div>
-              <Link href="">
-                <Button variant="outlined" type="button" className="normal-case p-1 py-0">
-                  {post.topic.name}
-                </Button>
-              </Link>
+              <TagItem topic={post.topic} />
               <div className="mt-2 font-bold">
                 <Link href={'/post/view/' + post._id}>
                   <span className="cursor-pointer hover:text-cyan-500">{post.title}</span>
