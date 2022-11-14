@@ -99,8 +99,8 @@ const Navbar = (): JSX.Element => {
         <StyledToolbar>
           {/* Links (TODO: change to final URLs) */}
           <NavLink href="/">Trang chủ</NavLink>
-          <NavLink href="/post">Bài viết</NavLink>
-          <NavLink href="/topic">Đề xuất Chủ đề</NavLink>
+          <NavLink href="/topic">Bài viết</NavLink>
+          <NavLink href="/suggest">Đề xuất Chủ đề</NavLink>
           <NavLink href="/post/new">Tạo bài viết</NavLink>
 
           <Box sx={{ flexGrow: 1 }} />
