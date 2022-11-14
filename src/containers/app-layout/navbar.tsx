@@ -87,7 +87,9 @@ const Navbar = (): JSX.Element => {
         <StyledToolbar>
           {/* Logo */}
           <Link href="/">
-            <a><Image src="/logo.png" width={121} height={51} className="pl-10" /></a>
+            <a>
+              <Image src="/logo.png" width={166} height={50} className="pl-10" />
+            </a>
           </Link>
           <Box sx={{ flexGrow: 1 }} />
           {/* Search bar */}

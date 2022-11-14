@@ -149,24 +149,14 @@ const DeleteConfirm = ({ open, id, onChange, updateUI }: IDelete) => {
     appLibrary.showloading()
     try {
       const { message } = await TopicsService.topics3({ id: deleteId })
-      console.log(message)
       if (message === 'Delete Success') {
         toast.success('Xóa chủ đề thành công')
         appLibrary.hideloading()
         updateUI(deleteId)
-        return
       }
-      if (message === 'contained post') {
-        toast.error('Chủ đề này đã có bài viết, không thể xóa')
-        appLibrary.hideloading()
-        return
-      }
-      toast.error('Xóa chủ đề thất bại')
-      appLibrary.hideloading()
     } catch (error) {
       console.log(error)
-      toast.error('Xóa chủ đề thất bại')
-
+      toast.error('Chủ đề này đã có bài viết, không thể xóa')
       appLibrary.hideloading()
     }
   }
@@ -232,7 +222,6 @@ const TopicContainer = (): JSX.Element => {
   }
 
   const deleteTopics = (id: string) => {
-    console.log(topics)
     setTopics(prev => prev.filter(item => item._id != id))
   }
 
@@ -272,13 +261,6 @@ const TopicContainer = (): JSX.Element => {
   }, [])
 
   const handleCreateTopic = async (name: CreateTopicDto) => {
-    let newTopic: TopicRespDto = {
-      _id: Date.now().toLocaleString(),
-      createdAt: new Date('11/11/2022'),
-      updatedAt: new Date('11/11/2022'),
-      name: name.name,
-    }
-    console.log(newTopic)
     var newArray = [...topics]
 
     appLibrary.showloading()
@@ -316,7 +298,7 @@ const TopicContainer = (): JSX.Element => {
   }
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Chủ đề', flex: 5 },
+    { field: 'name', headerName: 'Chủ đề', flex: 2 },
     {
       field: 'action',
       headerName: 'Hành động',
@@ -395,13 +377,13 @@ const TopicContainer = (): JSX.Element => {
               </FormControl>
             </div>
             <FormControl>
-              <Button variant="contained" type="submit" className="w-1/3 !text-white self-center">
+              <Button variant="contained" type="submit" className="w-full !text-white self-center !px-10">
                 Tạo
               </Button>
             </FormControl>
           </div>
         </form>
-        <div className="h-[500px] w-[90%] m-10">
+        <div className="h-[500px] lg:min-w-[30%] md:min-w-[80%] min-w-[90%] m-10">
           <DataGrid
             disableSelectionOnClick
             columns={columns}
