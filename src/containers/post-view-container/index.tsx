@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react'
 import { PostResponseDto, PostsService } from 'src/common/open-api'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
+import EditIcon from '@mui/icons-material/Edit'
 import Sms from '@mui/icons-material/Sms'
 import { Formatter } from 'src/common/helpers'
 import { appLibrary } from 'src/common/utils/loading'
 import TagItem from 'src/components/tag'
+import Link from 'next/link'
 
 export interface IProps {
   id?: string
@@ -56,7 +58,14 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         </Avatar>
         <div className="col-span-4">
           {postData.topic && <TagItem topic={postData.topic}></TagItem>}
-          <p className="font-semibold text-2xl my-3">{postData.title ?? ''}</p>
+          <p className="font-semibold text-2xl my-3">
+            {postData.title ?? ''}{' '}
+            <Link href={'/post/' + postData._id}>
+              <IconButton sx={{ color: 'primary.light' }}>
+                <EditIcon />
+              </IconButton>
+            </Link>
+          </p>
         </div>
         <div className="col-span-1">
           <Typography className="italic font-light" variant="subtitle1">
