@@ -1,5 +1,6 @@
 import { Avatar, Button, Card } from '@mui/material'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined'
 import Link from 'next/link'
 import { Formatter } from 'src/common/helpers'
@@ -31,6 +32,10 @@ export default function PostItem({ post }) {
           <div className="col-start-11 col-end-11 flex flex-col justify-end">
             <div className="flex flex-row items-center">
               <KeyboardArrowUpIcon color="primary" />
+              <span className="ml-2">{post.upvote_count}</span>
+            </div>
+            <div className="flex flex-row items-center">
+              <KeyboardArrowDownIcon color="primary" />
               <span className="ml-2">{post.upvote_count}</span>
             </div>
             <div className="flex flex-row items-center">
