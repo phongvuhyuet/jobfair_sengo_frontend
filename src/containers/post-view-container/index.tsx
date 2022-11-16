@@ -50,7 +50,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   }
 
   return (
-    <Card className="p-3">
+    <Card className="p-3 w-[65%]">
       <div className="grid grid-cols-6 gap-4 p-3">
         {/* Row: avatar, tag, title, date */}
         <Avatar sx={{ width: 80, height: 80 }} className="col-span-1 self-center justify-self-center">

@@ -88,7 +88,7 @@ const Navbar = (): JSX.Element => {
           {/* Logo */}
           <Link href="/">
             <a>
-              <Image src="/logo.png" width={166} height={50} className="pl-10" />
+              <Image src="/logo.png" width={166} height={50} />
             </a>
           </Link>
           <Box sx={{ flexGrow: 1 }} />
@@ -106,6 +106,7 @@ const Navbar = (): JSX.Element => {
           <NavLink href="/topic">Bài viết</NavLink>
           <NavLink href="/suggest">Đề xuất Chủ đề</NavLink>
           <NavLink href="/post/new">Tạo bài viết</NavLink>
+          <NavLink href="/admin/topic">Quản lý Chủ đề</NavLink>
 
           <Box sx={{ flexGrow: 1 }} />
           <IconButton size="large" className="pb-0">
