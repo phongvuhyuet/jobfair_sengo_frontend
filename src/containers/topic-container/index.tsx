@@ -298,11 +298,12 @@ const TopicContainer = (): JSX.Element => {
   }
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Chủ đề', flex: 2 },
+    { field: 'name', headerName: 'Chủ đề', minWidth: 330, flex: 2 },
     {
       field: 'action',
       headerName: 'Hành động',
       sortable: false,
+      minWidth: 175,
       flex: 1,
       renderCell: params => {
         return (
@@ -383,7 +384,7 @@ const TopicContainer = (): JSX.Element => {
             </FormControl>
           </div>
         </form>
-        <div className="h-[500px] lg:min-w-[30%] md:min-w-[80%] min-w-[90%] m-10">
+        <div className="h-[500px] min-w-[510px] m-10">
           <DataGrid
             disableSelectionOnClick
             columns={columns}
