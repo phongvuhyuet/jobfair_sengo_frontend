@@ -20,10 +20,7 @@ const PostsOfTopicContainer = ({ id }: IProps): JSX.Element => {
   const loadData = () => {
     appLibrary.showloading()
     setLoading(true)
-    Promise.all([
-      PostsService.byTopic({ topicId: id }),
-      TopicsService.topics4({ id: id })
-    ])
+    Promise.all([PostsService.filter({ topicId: id }), TopicsService.topics4({ id: id })])
       .then(([post, topic]) => {
         setPostListData(post)
         setTopic(topic)
@@ -33,7 +30,8 @@ const PostsOfTopicContainer = ({ id }: IProps): JSX.Element => {
 
         setLoading(false)
         appLibrary.hideloading()
-      }).catch(error => {
+      })
+      .catch(error => {
         console.log(error)
         appLibrary.hideloading()
       })
@@ -50,18 +48,22 @@ const PostsOfTopicContainer = ({ id }: IProps): JSX.Element => {
             ))}
           </ul>
         </div>
-      ) : !loading && (
-        <div className="w-full justify-items-start">
-          <h2 className="mt-0">{topic.name}</h2>
-          <Box sx={{ boxShadow: 3 }}>
-            <Card variant="outlined" className="p-8 min-w-full justify-items-center text-center">
-              <Typography variant="body1">Hiện tại chưa có bài viết nào thuộc chủ đề này</Typography>
-              <Button variant="contained" className="text-white self-center normal-case mt-3">
-                <Link href="/topic"><a>Quay lại</a></Link>
-              </Button>
-            </Card>
-          </Box>
-        </div>
+      ) : (
+        !loading && (
+          <div className="w-full justify-items-start">
+            <h2 className="mt-0">{topic.name}</h2>
+            <Box sx={{ boxShadow: 3 }}>
+              <Card variant="outlined" className="p-8 min-w-full justify-items-center text-center">
+                <Typography variant="body1">Hiện tại chưa có bài viết nào thuộc chủ đề này</Typography>
+                <Button variant="contained" className="text-white self-center normal-case mt-3">
+                  <Link href="/topic">
+                    <a>Quay lại</a>
+                  </Link>
+                </Button>
+              </Card>
+            </Box>
+          </div>
+        )
       )}
     </div>
   )

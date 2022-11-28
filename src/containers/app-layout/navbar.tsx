@@ -13,23 +13,25 @@ import NotificationsIcon from '@mui/icons-material/Notifications'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Autocomplete, TextField } from '@mui/material'
+import Search from 'src/components/search'
 
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.black, 0.05),
-  '&:hover': {
-    backgroundColor: alpha('#FF8E3C', 0.1),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  marginTop: 4,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
-}))
+// const Search = styled('div')(({ theme }) => ({
+//   position: 'relative',
+//   borderRadius: theme.shape.borderRadius,
+//   backgroundColor: alpha(theme.palette.common.black, 0.05),
+//   '&:hover': {
+//     backgroundColor: alpha('#FF8E3C', 0.1),
+//   },
+//   marginRight: theme.spacing(2),
+//   marginLeft: 0,
+//   marginTop: 4,
+//   width: '100%',
+//   [theme.breakpoints.up('sm')]: {
+//     marginLeft: theme.spacing(3),
+//     width: 'auto',
+//   },
+// }))
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
@@ -93,12 +95,7 @@ const Navbar = (): JSX.Element => {
           </Link>
           <Box sx={{ flexGrow: 1 }} />
           {/* Search bar */}
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase placeholder="Tìm kiếm…" inputProps={{ 'aria-label': 'search' }} />
-          </Search>
+          <Search />
         </StyledToolbar>
         <StyledToolbar>
           {/* Links (TODO: change to final URLs) */}
