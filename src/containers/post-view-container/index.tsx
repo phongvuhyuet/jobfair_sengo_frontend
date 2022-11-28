@@ -9,9 +9,10 @@ import { Formatter } from 'src/common/helpers'
 import { appLibrary } from 'src/common/utils/loading'
 import TagItem from 'src/components/tag'
 import Link from 'next/link'
+import { toast } from 'react-toastify'
 
 export interface IProps {
-  id?: string
+  id: string
 }
 
 const PostContainer = ({ id }: IProps): JSX.Element => {
@@ -37,6 +38,25 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         appLibrary.hideloading()
       }
     )
+  }
+
+  const onhandleVote = async (is_upvote: boolean) => {
+    appLibrary.showloading()
+    try {
+      const { message } = await PostsService.vote({ id: id, body: { is_upvote: is_upvote } })
+      if (message === 'vote success') {
+        getPostData()
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error('Vote không thành công')
+    } finally {
+      appLibrary.hideloading()
+    }
+  }
+
+  const handleVote = (is_upvote: boolean) => {
+    onhandleVote(is_upvote)
   }
 
   if (error) {
@@ -77,13 +97,13 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         <p className="my-2 text-center text-xs">{postData.user?.name ?? '-'}</p>
         <div className="flex-row col-span-5 gap-[10px]">
           <div className="inline pr-1">
-            <IconButton sx={{ color: 'primary.light' }}>
+            <IconButton sx={{ color: 'primary.light' }} onClick={() => handleVote(true)}>
               <KeyboardArrowUp />
             </IconButton>
             <span className="font-semibold">{postData.upvote_count ?? '-'}</span>
           </div>
           <div className="inline pr-1">
-            <IconButton>
+            <IconButton onClick={() => handleVote(false)}>
               <KeyboardArrowDown />
             </IconButton>
             <span className="font-semibold">{postData.downvote_count ?? '-'}</span>
