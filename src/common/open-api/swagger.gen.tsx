@@ -173,20 +173,22 @@ export class PostsService {
     });
   }
   /**
-   * filter list post by topic posts
+   * filter list post by topic posts and title
    */
-  static byTopic(
+  static filter(
     params: {
       /**  */
-      topicId: string;
+      topicId?: string;
+      /**  */
+      title?: string;
     } = {} as any,
     options: IRequestOptions = {}
   ): Promise<PostResponseDto[]> {
     return new Promise((resolve, reject) => {
-      let url = basePath + '/posts/by-topic';
+      let url = basePath + '/posts/filter';
 
       const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
-      configs.params = { topic_id: params['topicId'] };
+      configs.params = { topic_id: params['topicId'], title: params['title'] };
 
       /** 适配ios13，get请求不允许带body */
 
@@ -203,6 +205,31 @@ export class PostsService {
       const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
 
       /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * vote post
+   */
+  static vote(
+    params: {
+      /**  */
+      id: string;
+      /** requestBody */
+      body?: VotePostDto;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<StatusResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/posts/{id}/vote';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('post', 'application/json', url, options);
+
+      let data = params.body;
+
+      configs.data = data;
 
       axios(configs, resolve, reject);
     });
@@ -430,6 +457,16 @@ export interface UpdatePostDto {
 
   /**  */
   reject_reason?: string;
+}
+
+export interface VotePostDto {
+  /**  */
+  is_upvote?: boolean;
+}
+
+export interface StatusResponseDto {
+  /**  */
+  message?: string;
 }
 
 export interface TopicRespDto {
