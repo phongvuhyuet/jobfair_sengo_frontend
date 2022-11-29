@@ -20,8 +20,11 @@ export interface IProps {
   id: string
 }
 
+enum VoteState { None, Upvoted, Downvoted }
+
 const PostContainer = ({ id }: IProps): JSX.Element => {
   const [postData, setPostData] = useState({} as PostResponseDto)
+  const [voteState, setVoteState] = useState(VoteState.None)
   const [error, setError] = useState(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
@@ -34,26 +37,58 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   const getPostData = () => {
     if (!id) return
     appLibrary.showloading()
-    PostsService.posts3({ id: id }).then(
-      data => {
-        setPostData(data)
-        console.log(data)
-        appLibrary.hideloading()
-      },
-      error => {
-        const message = error.response.data.message
-        setError(message)
-        appLibrary.hideloading()
-      }
-    )
+    Promise.all([PostsService.posts3({ id: id }), PostsService.isVoted({ id: id })])
+      .then(
+        ([post, isVote]) => {
+          setPostData(post)
+          console.log(post)
+          const isVoteResult: string = isVote.result as unknown as string
+          switch (isVoteResult) {
+            case "upvoted":
+              setVoteState(VoteState.Upvoted)
+              break
+            case "downvoted":
+              setVoteState(VoteState.Downvoted)
+              break
+            default:
+              setVoteState(VoteState.None)
+              break
+          }
+          console.log(voteState)
+          appLibrary.hideloading()
+        },
+        error => {
+          const message = error.response.data.message
+          setError(message)
+          appLibrary.hideloading()
+        })
   }
 
   const onhandleVote = async (is_upvote: boolean) => {
     appLibrary.showloading()
     try {
       const { message } = await PostsService.vote({ id: id, body: { is_upvote: is_upvote } })
-      if (message === 'vote success') {
-        getPostData()
+      console.log(message)
+
+      if (is_upvote) {
+        const changeUpvoteCount = voteState === VoteState.Upvoted ? -1 : 1
+        const changeDownvoteCount = voteState === VoteState.Downvoted ? -1 : 0
+        setPostData({
+          ...postData,
+          upvote_count: postData.upvote_count! + changeUpvoteCount,
+          downvote_count: postData.downvote_count! + changeDownvoteCount,
+        })
+        setVoteState(voteState === VoteState.Upvoted ? VoteState.None : VoteState.Upvoted)
+      }
+      else {
+        const changeUpvoteCount = voteState === VoteState.Upvoted ? -1 : 0
+        const changeDownvoteCount = voteState === VoteState.Downvoted ? -1 : 1
+        setPostData({
+          ...postData,
+          upvote_count: postData.upvote_count! + changeUpvoteCount,
+          downvote_count: postData.downvote_count! + changeDownvoteCount,
+        })
+        setVoteState(voteState === VoteState.Downvoted ? VoteState.None : VoteState.Downvoted)
       }
     } catch (error) {
       console.log(error)
@@ -135,13 +170,17 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         <p className="my-2 text-center text-xs">{postData.user?.name ?? '-'}</p>
         <div className="flex-row col-span-5 gap-[10px]">
           <div className="inline pr-1">
-            <IconButton sx={{ color: 'primary.light' }} onClick={() => handleVote(true)}>
+            <IconButton
+              sx={voteState === VoteState.Upvoted ? { color: 'primary.light' } : {}}
+              onClick={() => handleVote(true)}>
               <KeyboardArrowUp />
             </IconButton>
             <span className="font-semibold">{postData.upvote_count ?? '-'}</span>
           </div>
           <div className="inline pr-1">
-            <IconButton onClick={() => handleVote(false)}>
+            <IconButton
+              sx={voteState === VoteState.Downvoted ? { color: 'primary.light' } : {}}
+              onClick={() => handleVote(false)}>
               <KeyboardArrowDown />
             </IconButton>
             <span className="font-semibold">{postData.downvote_count ?? '-'}</span>
