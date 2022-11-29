@@ -197,7 +197,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
               type="button"
               className="w-[110px] xl:w-[130px] ml-2 text-white bg-[#6c757d] self-center"
               onClick={() => {
-                router.push('/post')
+                router.push('/post/view/' + id)
               }}
             >
               Hủy
