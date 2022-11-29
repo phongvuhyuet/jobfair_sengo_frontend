@@ -234,6 +234,27 @@ export class PostsService {
       axios(configs, resolve, reject);
     });
   }
+  /**
+   * get is voted
+   */
+  static isVoted(
+    params: {
+      /**  */
+      id: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<IsVoteResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/posts/{id}/isVoted';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+
+      /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
 }
 
 export class TopicsService {
@@ -469,6 +490,11 @@ export interface StatusResponseDto {
   message?: string;
 }
 
+export interface IsVoteResponseDto {
+  /**  */
+  result?: object;
+}
+
 export interface TopicRespDto {
   /**  */
   _id?: string;
@@ -508,6 +534,20 @@ export interface TopicWithPostCountDto {
 
   /**  */
   countPost?: number;
+}
+
+export interface UserResponseDto {
+  /**  */
+  _id?: string;
+
+  /**  */
+  name?: string;
+
+  /**  */
+  createdAt?: Date;
+
+  /**  */
+  updatedAt?: Date;
 }
 export enum EnumUpdatePostDtoStatus {
   'active' = 'active',

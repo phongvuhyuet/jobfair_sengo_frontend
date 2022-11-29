@@ -1,23 +1,34 @@
 import { Button, Avatar, IconButton, Card, TextField, Typography } from '@mui/material'
+import { Menu, MenuItem, ListItemIcon, ListItemText, Dialog, DialogTitle, DialogActions } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { PostResponseDto, PostsService } from 'src/common/open-api'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Sms from '@mui/icons-material/Sms'
 import { Formatter } from 'src/common/helpers'
 import { appLibrary } from 'src/common/utils/loading'
 import TagItem from 'src/components/tag'
 import Link from 'next/link'
+import Router from 'next/router'
 import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 export interface IProps {
   id: string
 }
 
+enum VoteState { None, Upvoted, Downvoted }
+
 const PostContainer = ({ id }: IProps): JSX.Element => {
   const [postData, setPostData] = useState({} as PostResponseDto)
+  const [voteState, setVoteState] = useState(VoteState.None)
   const [error, setError] = useState(null)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const menuOpen = Boolean(anchorEl)
+  const [openDelete, setOpenDelete] = useState(false)
 
   useEffect(() => {
     getPostData()
@@ -26,26 +37,58 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   const getPostData = () => {
     if (!id) return
     appLibrary.showloading()
-    PostsService.posts3({ id: id }).then(
-      data => {
-        setPostData(data)
-        console.log(data)
-        appLibrary.hideloading()
-      },
-      error => {
-        const message = error.response.data.message
-        setError(message)
-        appLibrary.hideloading()
-      }
-    )
+    Promise.all([PostsService.posts3({ id: id }), PostsService.isVoted({ id: id })])
+      .then(
+        ([post, isVote]) => {
+          setPostData(post)
+          console.log(post)
+          const isVoteResult: string = isVote.result as unknown as string
+          switch (isVoteResult) {
+            case "upvoted":
+              setVoteState(VoteState.Upvoted)
+              break
+            case "downvoted":
+              setVoteState(VoteState.Downvoted)
+              break
+            default:
+              setVoteState(VoteState.None)
+              break
+          }
+          console.log(voteState)
+          appLibrary.hideloading()
+        },
+        error => {
+          const message = error.response.data.message
+          setError(message)
+          appLibrary.hideloading()
+        })
   }
 
   const onhandleVote = async (is_upvote: boolean) => {
     appLibrary.showloading()
     try {
       const { message } = await PostsService.vote({ id: id, body: { is_upvote: is_upvote } })
-      if (message === 'vote success') {
-        getPostData()
+      console.log(message)
+
+      if (is_upvote) {
+        const changeUpvoteCount = voteState === VoteState.Upvoted ? -1 : 1
+        const changeDownvoteCount = voteState === VoteState.Downvoted ? -1 : 0
+        setPostData({
+          ...postData,
+          upvote_count: postData.upvote_count! + changeUpvoteCount,
+          downvote_count: postData.downvote_count! + changeDownvoteCount,
+        })
+        setVoteState(voteState === VoteState.Upvoted ? VoteState.None : VoteState.Upvoted)
+      }
+      else {
+        const changeUpvoteCount = voteState === VoteState.Upvoted ? -1 : 0
+        const changeDownvoteCount = voteState === VoteState.Downvoted ? -1 : 1
+        setPostData({
+          ...postData,
+          upvote_count: postData.upvote_count! + changeUpvoteCount,
+          downvote_count: postData.downvote_count! + changeDownvoteCount,
+        })
+        setVoteState(voteState === VoteState.Downvoted ? VoteState.None : VoteState.Downvoted)
       }
     } catch (error) {
       console.log(error)
@@ -57,6 +100,38 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
 
   const handleVote = (is_upvote: boolean) => {
     onhandleVote(is_upvote)
+  }
+
+  const onDeleteClicked = () => {
+    setAnchorEl(null)
+    setOpenDelete(true)
+  }
+
+  const onDeleteConfirm = async () => {
+    appLibrary.showloading()
+    try {
+      await PostsService.posts2({ id: id })
+      appLibrary.hideloading()
+      toast.success('Đã xóa bài viết thành công')
+      Router.push("/topic/" + postData.topic?._id)
+    } catch (error) {
+      console.log(error)
+      toast.error('Xóa bài viết không thành công')
+      setOpenDelete(false)
+      appLibrary.hideloading()
+    }
+  }
+
+  const onDeleteCancel = () => {
+    setOpenDelete(false)
+  }
+
+  const showContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const closeContextMenu = () => {
+    setAnchorEl(null)
   }
 
   if (error) {
@@ -80,15 +155,13 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           {postData.topic && <TagItem topic={postData.topic}></TagItem>}
           <p className="font-semibold text-2xl my-3">
             {postData.title ?? ''}{' '}
-            <Link href={'/post/' + postData._id}>
-              <IconButton sx={{ color: 'primary.light' }}>
-                <EditIcon />
-              </IconButton>
-            </Link>
           </p>
         </div>
-        <div className="col-span-1">
-          <Typography className="italic font-light" variant="subtitle1">
+        <div className="col-span-1 grid justify-items-end">
+          <IconButton className="m-l-auto" onClick={showContextMenu} >
+            <MoreHorizIcon />
+          </IconButton>
+          <Typography className="italic font-light mr-3" variant="subtitle1">
             {Formatter.dateTime(postData.createdAt)}
           </Typography>
         </div>
@@ -97,13 +170,17 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         <p className="my-2 text-center text-xs">{postData.user?.name ?? '-'}</p>
         <div className="flex-row col-span-5 gap-[10px]">
           <div className="inline pr-1">
-            <IconButton sx={{ color: 'primary.light' }} onClick={() => handleVote(true)}>
+            <IconButton
+              sx={voteState === VoteState.Upvoted ? { color: 'primary.light' } : {}}
+              onClick={() => handleVote(true)}>
               <KeyboardArrowUp />
             </IconButton>
             <span className="font-semibold">{postData.upvote_count ?? '-'}</span>
           </div>
           <div className="inline pr-1">
-            <IconButton onClick={() => handleVote(false)}>
+            <IconButton
+              sx={voteState === VoteState.Downvoted ? { color: 'primary.light' } : {}}
+              onClick={() => handleVote(false)}>
               <KeyboardArrowDown />
             </IconButton>
             <span className="font-semibold">{postData.downvote_count ?? '-'}</span>
@@ -139,6 +216,48 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           </Button>
         </div>
       </div>
+      <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeContextMenu} >
+        <Link href={'/post/' + postData._id}>
+          <MenuItem>
+            <ListItemIcon>
+              <EditIcon />
+            </ListItemIcon>
+            <ListItemText>
+              Sửa bài viết
+            </ListItemText>
+          </MenuItem>
+        </Link>
+        <MenuItem onClick={onDeleteClicked}>
+          <ListItemIcon>
+            <DeleteIcon />
+          </ListItemIcon>
+          <ListItemText>
+            Xóa bài viết
+          </ListItemText>
+        </MenuItem>
+      </Menu>
+      <Dialog open={openDelete} keepMounted>
+        <DialogTitle>Bạn có chắc chắn muốn xóa bài viết?</DialogTitle>
+        <DialogActions>
+          <Button
+            variant="contained"
+            type="submit"
+            onClick={onDeleteConfirm}
+            color="primary"
+            className="w-1/3 !text-white self-center"
+          >
+            Xóa
+          </Button>
+          <Button
+            variant="contained"
+            onClick={onDeleteCancel}
+            color="secondary"
+            className="w-1/3 text-white self-center"
+          >
+            Hủy
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }
