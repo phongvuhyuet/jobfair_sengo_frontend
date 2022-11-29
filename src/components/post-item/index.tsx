@@ -36,7 +36,7 @@ export default function PostItem({ post }) {
             </div>
             <div className="flex flex-row items-center">
               <KeyboardArrowDownIcon color="primary" />
-              <span className="ml-2">{post.upvote_count}</span>
+              <span className="ml-2">{post.downvote_count}</span>
             </div>
             <div className="flex flex-row items-center">
               <CommentOutlinedIcon color="primary" />
