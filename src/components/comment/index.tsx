@@ -1,4 +1,4 @@
-import { Avatar, Button, FormControl, IconButton, Menu, MenuItem, TextField } from '@mui/material'
+import { Avatar, Button, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogActions, TextField } from '@mui/material'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import React, { useState } from 'react'
 import { CommentsService } from 'src/common/open-api'
@@ -12,6 +12,7 @@ type FormInputs = {
 
 export default function Comment(props) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [openDelete, setOpenDelete] = React.useState(false)
   const open = Boolean(anchorEl)
   const [edit, setEdit] = useState(false)
   const [comment, setComment] = useState(props.comment.content)
@@ -27,9 +28,25 @@ export default function Comment(props) {
   const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
   }
+
   const handleCloseMenu = () => {
     setAnchorEl(null)
   }
+
+  const onDeleteConfirm = () => {
+    setOpenDelete(false)
+    handleDeleteComment(props.comment._id)
+  }
+
+  const onDeleteCancel = () => {
+    setOpenDelete(false)
+  }
+
+  const handleOpenDeleteDialog = () => {
+    setOpenDelete(true)
+    handleCloseMenu()
+  }
+
   const handleDeleteComment = commentId => {
     appLibrary.showloading()
     setAnchorEl(null)
@@ -134,9 +151,31 @@ export default function Comment(props) {
           <MenuItem onClick={openEdit}>
             Chỉnh sửa<a href=""></a>
           </MenuItem>
-          <MenuItem onClick={() => handleDeleteComment(props.comment._id)}>Xóa</MenuItem>
+          <MenuItem onClick={handleOpenDeleteDialog}>Xóa</MenuItem>
         </Menu>
       </div>
+      <Dialog open={openDelete} keepMounted>
+        <DialogTitle>Bạn có chắc chắn muốn xóa bình luận?</DialogTitle>
+        <DialogActions>
+          <Button
+            variant="contained"
+            type="submit"
+            onClick={onDeleteConfirm}
+            color="primary"
+            className="w-1/3 !text-white self-center"
+          >
+            Xóa
+          </Button>
+          <Button
+            variant="contained"
+            onClick={onDeleteCancel}
+            color="secondary"
+            className="w-1/3 text-white self-center"
+          >
+            Hủy
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   )
 }

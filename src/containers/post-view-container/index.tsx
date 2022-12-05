@@ -15,8 +15,14 @@ import TagItem from 'src/components/tag'
 import Link from 'next/link'
 import Router from 'next/router'
 import { toast } from 'react-toastify'
+import { useForm } from 'react-hook-form'
 import 'react-toastify/dist/ReactToastify.css'
 import Comment from 'src/components/comment'
+
+type CommentFormInputs = {
+  comment: string
+}
+
 export interface IProps {
   id: string
 }
@@ -30,11 +36,21 @@ enum VoteState {
 const PostContainer = ({ id }: IProps): JSX.Element => {
   const [postData, setPostData] = useState({} as PostResponseDto)
   const [voteState, setVoteState] = useState(VoteState.None)
-  const [error, setError] = useState(null)
+  const [error, setErrorMessage] = useState(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
   const [openDelete, setOpenDelete] = useState(false)
   const [commentData, setCommentData] = useState<CommentResponseDto[]>([])
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    setValue,
+    formState: { errors },
+  } = useForm<CommentFormInputs>({ criteriaMode: 'all' })
+
   useEffect(() => {
     getPostData()
   }, [id])
@@ -67,7 +83,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
       },
       error => {
         const message = error.response.data.message
-        setError(message)
+        setErrorMessage(message)
         appLibrary.hideloading()
       }
     )
@@ -99,6 +115,27 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
     } catch (error) {
       console.log(error)
       toast.error('Vote không thành công')
+    } finally {
+      appLibrary.hideloading()
+    }
+  }
+
+  const onCommentSubmit = (data: CommentFormInputs) => {
+    const { comment } = data
+    reset()
+    handleCreateComment(comment)
+  }
+
+  const handleCreateComment = async (comment: string) => {
+    appLibrary.showloading()
+    try {
+      const { content } = await CommentsService.comments({ body: { content: comment, post_id: id } })
+      if (content) {
+        const comment = await CommentsService.comments1({ postId: id });
+        setCommentData(comment);
+      }
+    } catch (error) {
+      console.log(error)
     } finally {
       appLibrary.hideloading()
     }
@@ -201,49 +238,33 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
       </div>
       <div className="mx-5 p-3" dangerouslySetInnerHTML={{ __html: postData.content ?? '' }}></div>
 
-      {/* Comment */}
-      {/* <div className="border-solid border-t border-0 border-gray-300 p-3 grid grid-cols-6">
-        <div className="col-span-1 self-start justify-self-center mt-3 mr-5 items-center">
-          <Avatar sx={{ width: 80, height: 80 }} className="mb-5 ml-auto mr-auto">
-            N
-          </Avatar>
-          <p className="my-2 text-center text-xs">Nguyen Van Quynh</p>
-        </div>
-        <div className="col-span-5">
-          <div className="flex-row">
-            <div className="inline-block pt-2 pb-4">Bình Luận</div>
-            <Button variant="text" type="submit" className="inline self-center float-right normal-case text-gray-400">
-              + Chọn tập tin
-            </Button>
-          </div>
-          <TextField placeholder="Viết bình luận" multiline fullWidth minRows={3} />
-          <Button variant="contained" type="submit" className="text-white self-center float-right normal-case mt-3">
-            Gửi
-          </Button>
-        </div>
-      </div> */}
       <div className="min-w-full">
         <Divider />
         <h4 className="p-3">Bình luận</h4>
         <div className="flex flex-row gap-[10px] mt-3 mb-[25px] mx-3">
           <Avatar>N</Avatar>
-          <div className="flex items-center w-full">
-            <TextField
-              placeholder="Viết bình luận"
-              multiline
-              fullWidth
-              variant="outlined"
-              minRows={1}
-              size="small"
-              sx={{
-                '& fieldset': {
-                  borderRadius: '18px',
-                },
-              }}
-            />
-            <IconButton className="m-l-auto">
-              <SendIcon color="primary" />
-            </IconButton>
+          <div className="flex flex-col w-full">
+            <form onSubmit={handleSubmit(onCommentSubmit)}>
+              <div className="flex items-center w-full">
+                <TextField
+                  placeholder="Viết bình luận"
+                  multiline
+                  fullWidth
+                  variant="outlined"
+                  minRows={1}
+                  size="small"
+                  sx={{
+                    '& fieldset': {
+                      borderRadius: '18px',
+                    },
+                  }}
+                  {...register('comment')}
+                />
+                <IconButton className="m-l-auto" type="submit">
+                  <SendIcon color="primary" />
+                </IconButton>
+              </div>
+            </form>
           </div>
         </div>
         {commentData ? (
@@ -294,7 +315,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Card>
+    </Card >
   )
 }
 
