@@ -1,12 +1,13 @@
-import { Button, Avatar, IconButton, Card, TextField, Typography } from '@mui/material'
+import { Button, Avatar, IconButton, Card, TextField, Typography, Divider } from '@mui/material'
 import { Menu, MenuItem, ListItemIcon, ListItemText, Dialog, DialogTitle, DialogActions } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { PostResponseDto, PostsService } from 'src/common/open-api'
+import { CommentResponseDto, CommentsService, PostResponseDto, PostsService } from 'src/common/open-api'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import SendIcon from '@mui/icons-material/Send'
 import Sms from '@mui/icons-material/Sms'
 import { Formatter } from 'src/common/helpers'
 import { appLibrary } from 'src/common/utils/loading'
@@ -15,12 +16,16 @@ import Link from 'next/link'
 import Router from 'next/router'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-
+import Comment from 'src/components/comment'
 export interface IProps {
   id: string
 }
 
-enum VoteState { None, Upvoted, Downvoted }
+enum VoteState {
+  None,
+  Upvoted,
+  Downvoted,
+}
 
 const PostContainer = ({ id }: IProps): JSX.Element => {
   const [postData, setPostData] = useState({} as PostResponseDto)
@@ -29,7 +34,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
   const [openDelete, setOpenDelete] = useState(false)
-
+  const [commentData, setCommentData] = useState<CommentResponseDto[]>([])
   useEffect(() => {
     getPostData()
   }, [id])
@@ -37,39 +42,41 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   const getPostData = () => {
     if (!id) return
     appLibrary.showloading()
-    Promise.all([PostsService.posts3({ id: id }), PostsService.isVoted({ id: id })])
-      .then(
-        ([post, isVote]) => {
-          setPostData(post)
-          console.log(post)
-          const isVoteResult: string = isVote.result as unknown as string
-          switch (isVoteResult) {
-            case "upvoted":
-              setVoteState(VoteState.Upvoted)
-              break
-            case "downvoted":
-              setVoteState(VoteState.Downvoted)
-              break
-            default:
-              setVoteState(VoteState.None)
-              break
-          }
-          console.log(voteState)
-          appLibrary.hideloading()
-        },
-        error => {
-          const message = error.response.data.message
-          setError(message)
-          appLibrary.hideloading()
-        })
+    Promise.all([
+      PostsService.posts3({ id: id }),
+      PostsService.isVoted({ id: id }),
+      CommentsService.comments1({ postId: id }),
+    ]).then(
+      ([post, isVote, comment]) => {
+        setPostData(post)
+        console.log(comment)
+        setCommentData(comment)
+        const isVoteResult: string = (isVote.result as unknown) as string
+        switch (isVoteResult) {
+          case 'upvoted':
+            setVoteState(VoteState.Upvoted)
+            break
+          case 'downvoted':
+            setVoteState(VoteState.Downvoted)
+            break
+          default:
+            setVoteState(VoteState.None)
+            break
+        }
+        appLibrary.hideloading()
+      },
+      error => {
+        const message = error.response.data.message
+        setError(message)
+        appLibrary.hideloading()
+      }
+    )
   }
 
   const onhandleVote = async (is_upvote: boolean) => {
     appLibrary.showloading()
     try {
       const { message } = await PostsService.vote({ id: id, body: { is_upvote: is_upvote } })
-      console.log(message)
-
       if (is_upvote) {
         const changeUpvoteCount = voteState === VoteState.Upvoted ? -1 : 1
         const changeDownvoteCount = voteState === VoteState.Downvoted ? -1 : 0
@@ -79,8 +86,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           downvote_count: postData.downvote_count! + changeDownvoteCount,
         })
         setVoteState(voteState === VoteState.Upvoted ? VoteState.None : VoteState.Upvoted)
-      }
-      else {
+      } else {
         const changeUpvoteCount = voteState === VoteState.Upvoted ? -1 : 0
         const changeDownvoteCount = voteState === VoteState.Downvoted ? -1 : 1
         setPostData({
@@ -113,7 +119,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
       await PostsService.posts2({ id: id })
       appLibrary.hideloading()
       toast.success('Đã xóa bài viết thành công')
-      Router.push("/topic/" + postData.topic?._id)
+      Router.push('/topic/' + postData.topic?._id)
     } catch (error) {
       console.log(error)
       toast.error('Xóa bài viết không thành công')
@@ -145,7 +151,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   }
 
   return (
-    <Card className="p-3 w-[65%]">
+    <Card className="p-5 w-[65%] mb-5">
       <div className="grid grid-cols-6 gap-4 p-3">
         {/* Row: avatar, tag, title, date */}
         <Avatar sx={{ width: 80, height: 80 }} className="col-span-1 self-center justify-self-center">
@@ -153,12 +159,10 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
         </Avatar>
         <div className="col-span-4">
           {postData.topic && <TagItem topic={postData.topic}></TagItem>}
-          <p className="font-semibold text-2xl my-3">
-            {postData.title ?? ''}{' '}
-          </p>
+          <p className="font-semibold text-2xl my-3">{postData.title ?? ''} </p>
         </div>
         <div className="col-span-1 grid justify-items-end">
-          <IconButton className="m-l-auto" onClick={showContextMenu} >
+          <IconButton className="m-l-auto" onClick={showContextMenu}>
             <MoreHorizIcon />
           </IconButton>
           <Typography className="italic font-light mr-3" variant="subtitle1">
@@ -172,7 +176,8 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           <div className="inline pr-1">
             <IconButton
               sx={voteState === VoteState.Upvoted ? { color: 'primary.light' } : {}}
-              onClick={() => handleVote(true)}>
+              onClick={() => handleVote(true)}
+            >
               <KeyboardArrowUp />
             </IconButton>
             <span className="font-semibold">{postData.upvote_count ?? '-'}</span>
@@ -180,7 +185,8 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           <div className="inline pr-1">
             <IconButton
               sx={voteState === VoteState.Downvoted ? { color: 'primary.light' } : {}}
-              onClick={() => handleVote(false)}>
+              onClick={() => handleVote(false)}
+            >
               <KeyboardArrowDown />
             </IconButton>
             <span className="font-semibold">{postData.downvote_count ?? '-'}</span>
@@ -189,14 +195,14 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
             <IconButton sx={{ color: 'primary.light' }}>
               <Sms />
             </IconButton>
-            <span className="font-semibold">-</span>
+            <span className="font-semibold"> {commentData.length}</span>
           </div>
         </div>
       </div>
-      <div className="p-3" dangerouslySetInnerHTML={{ __html: postData.content ?? '' }}></div>
+      <div className="mx-5 p-3" dangerouslySetInnerHTML={{ __html: postData.content ?? '' }}></div>
 
       {/* Comment */}
-      <div className="border-solid border-t border-0 border-gray-300 p-3 grid grid-cols-6">
+      {/* <div className="border-solid border-t border-0 border-gray-300 p-3 grid grid-cols-6">
         <div className="col-span-1 self-start justify-self-center mt-3 mr-5 items-center">
           <Avatar sx={{ width: 80, height: 80 }} className="mb-5 ml-auto mr-auto">
             N
@@ -215,25 +221,55 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
             Gửi
           </Button>
         </div>
+      </div> */}
+      <div className="min-w-full">
+        <Divider />
+        <h4 className="p-3">Bình luận</h4>
+        <div className="flex flex-row gap-[10px] mt-3 mb-[25px] mx-3">
+          <Avatar>N</Avatar>
+          <div className="flex items-center w-full">
+            <TextField
+              placeholder="Viết bình luận"
+              multiline
+              fullWidth
+              variant="outlined"
+              minRows={1}
+              size="small"
+              sx={{
+                '& fieldset': {
+                  borderRadius: '18px',
+                },
+              }}
+            />
+            <IconButton className="m-l-auto">
+              <SendIcon color="primary" />
+            </IconButton>
+          </div>
+        </div>
+        {commentData ? (
+          <>
+            {commentData.map(comment => (
+              <Comment key={comment._id} comment={comment} setComment={setCommentData} />
+            ))}
+          </>
+        ) : (
+          <></>
+        )}
       </div>
-      <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeContextMenu} >
+      <Menu anchorEl={anchorEl} open={menuOpen} onClose={closeContextMenu}>
         <Link href={'/post/' + postData._id}>
           <MenuItem>
             <ListItemIcon>
               <EditIcon />
             </ListItemIcon>
-            <ListItemText>
-              Sửa bài viết
-            </ListItemText>
+            <ListItemText>Sửa bài viết</ListItemText>
           </MenuItem>
         </Link>
         <MenuItem onClick={onDeleteClicked}>
           <ListItemIcon>
             <DeleteIcon />
           </ListItemIcon>
-          <ListItemText>
-            Xóa bài viết
-          </ListItemText>
+          <ListItemText>Xóa bài viết</ListItemText>
         </MenuItem>
       </Menu>
       <Dialog open={openDelete} keepMounted>

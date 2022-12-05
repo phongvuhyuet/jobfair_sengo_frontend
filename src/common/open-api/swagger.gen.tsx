@@ -257,6 +257,100 @@ export class PostsService {
   }
 }
 
+export class CommentsService {
+  /**
+   * create comment
+   */
+  static comments(
+    params: {
+      /** requestBody */
+      body?: CreateCommentDto;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<CommentResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/comments';
+
+      const configs: IRequestConfig = getConfigs('post', 'application/json', url, options);
+
+      let data = params.body;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * get comments by postId
+   */
+  static comments1(
+    params: {
+      /**  */
+      postId: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<CommentResponseDto[]> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/comments/{postId}';
+      url = url.replace('{postId}', params['postId'] + '');
+
+      const configs: IRequestConfig = getConfigs('get', 'application/json', url, options);
+
+      /** 适配ios13，get请求不允许带body */
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * update comment
+   */
+  static comments2(
+    params: {
+      /**  */
+      id: string;
+      /** requestBody */
+      body?: UpdateCommentDto;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<CommentResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/comments/{id}';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('put', 'application/json', url, options);
+
+      let data = params.body;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+  /**
+   * delete comment
+   */
+  static comments3(
+    params: {
+      /**  */
+      id: string;
+    } = {} as any,
+    options: IRequestOptions = {}
+  ): Promise<StatusResponseDto> {
+    return new Promise((resolve, reject) => {
+      let url = basePath + '/comments/{id}';
+      url = url.replace('{id}', params['id'] + '');
+
+      const configs: IRequestConfig = getConfigs('delete', 'application/json', url, options);
+
+      let data = null;
+
+      configs.data = data;
+
+      axios(configs, resolve, reject);
+    });
+  }
+}
+
 export class TopicsService {
   /**
    * create topic
@@ -493,6 +587,47 @@ export interface StatusResponseDto {
 export interface IsVoteResponseDto {
   /**  */
   result?: object;
+}
+
+export interface PostInfo {
+  /**  */
+  title?: string;
+
+  /**  */
+  _id?: string;
+}
+
+export interface CommentResponseDto {
+  /**  */
+  _id?: string;
+
+  /**  */
+  content?: string;
+
+  /**  */
+  post?: PostInfo;
+
+  /**  */
+  user?: UserInfo;
+
+  /**  */
+  createdAt?: Date;
+
+  /**  */
+  updatedAt?: Date;
+}
+
+export interface CreateCommentDto {
+  /**  */
+  content?: string;
+
+  /**  */
+  post_id?: string;
+}
+
+export interface UpdateCommentDto {
+  /**  */
+  content?: string;
 }
 
 export interface TopicRespDto {
