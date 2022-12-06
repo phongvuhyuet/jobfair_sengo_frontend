@@ -6,6 +6,7 @@ import { toast } from 'react-toastify'
 import { appLibrary } from 'src/common/utils/loading'
 import SendIcon from '@mui/icons-material/Send'
 import { useForm } from 'react-hook-form'
+
 type FormInputs = {
   comment: string
 }
@@ -20,8 +21,8 @@ export default function Comment(props) {
     register,
     handleSubmit,
     reset,
-    setValue,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<FormInputs>({ criteriaMode: 'all' })
 
@@ -109,13 +110,17 @@ export default function Comment(props) {
                 fullWidth
                 variant="outlined"
                 minRows={1}
+                error={errors.comment ? true : false}
+                helperText={
+                  errors.comment ? 'Bình luận không thể để trống.' : null
+                }
                 size="small"
                 sx={{
                   '& fieldset': {
                     borderRadius: '18px',
                   },
                 }}
-                {...register('comment')}
+                {...register('comment', { required: true })}
               />
               <IconButton className="m-l-auto" type="submit">
                 <SendIcon color="primary" />
