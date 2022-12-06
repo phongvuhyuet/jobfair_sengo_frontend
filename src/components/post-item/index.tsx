@@ -40,7 +40,7 @@ export default function PostItem({ post }) {
             </div>
             <div className="flex flex-row items-center">
               <CommentOutlinedIcon color="primary" />
-              <span className="ml-2">100</span>
+              <span className="ml-2">{post.comment_count}</span>
             </div>
           </div>
         </li>

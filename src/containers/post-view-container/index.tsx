@@ -121,6 +121,11 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
   }
 
   const onCommentSubmit = (data: CommentFormInputs) => {
+    setError('comment', {
+      types: {
+        pattern: 'Bình luận không thể để trống.',
+      },
+    })
     const { comment } = data
     reset()
     handleCreateComment(comment)
@@ -245,7 +250,7 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
           <Avatar>N</Avatar>
           <div className="flex flex-col w-full">
             <form onSubmit={handleSubmit(onCommentSubmit)}>
-              <div className="flex items-center w-full">
+              <div className="flex place-items-start w-full">
                 <TextField
                   placeholder="Viết bình luận"
                   multiline
@@ -253,14 +258,18 @@ const PostContainer = ({ id }: IProps): JSX.Element => {
                   variant="outlined"
                   minRows={1}
                   size="small"
+                  error={errors.comment ? true : false}
+                  helperText={
+                    errors.comment ? 'Bình luận không thể để trống.' : null
+                  }
                   sx={{
                     '& fieldset': {
                       borderRadius: '18px',
                     },
                   }}
-                  {...register('comment')}
+                  {...register('comment', { required: true })}
                 />
-                <IconButton className="m-l-auto" type="submit">
+                <IconButton className="m-l-auto align-self-start" type="submit">
                   <SendIcon color="primary" />
                 </IconButton>
               </div>

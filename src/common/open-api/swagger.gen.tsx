@@ -7,7 +7,7 @@
 // @ts-nocheck
 import axiosStatic, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
-export interface IRequestOptions extends AxiosRequestConfig { }
+export interface IRequestOptions extends AxiosRequestConfig {}
 
 export interface IRequestConfig {
   method?: any;
@@ -52,12 +52,12 @@ export function getConfigs(method: string, contentType: string, url: string, opt
 
 export const basePath = '/api/v1';
 
-export interface IList<T> extends Array<T> { }
-export interface List<T> extends Array<T> { }
+export interface IList<T> extends Array<T> {}
+export interface List<T> extends Array<T> {}
 export interface IDictionary<TValue> {
   [key: string]: TValue;
 }
-export interface Dictionary<TValue> extends IDictionary<TValue> { }
+export interface Dictionary<TValue> extends IDictionary<TValue> {}
 
 export interface IListResult<T> {
   items?: T[];
@@ -532,6 +532,9 @@ export interface PostResponseDto {
 
   /**  */
   updatedAt?: Date;
+
+  /**  */
+  comment_count?: number;
 }
 
 export interface CreatePostDto {
