@@ -532,6 +532,9 @@ export interface PostResponseDto {
 
   /**  */
   updatedAt?: Date;
+
+  /**  */
+  comment_count?: number;
 }
 
 export interface CreatePostDto {
